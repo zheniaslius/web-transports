@@ -7,13 +7,9 @@ const name = document.querySelector('#name');
 const nick = document.querySelector('#nick');
 const names = document.querySelector('.names');
 
-let personName, personNick;
-
 const socket = io.connect();
 
-const subscribe = () => {
-    setInterval(() => getMessages(), 1000);
-}
+let personName, personNick;
 
 start.addEventListener('click', e => {
     personName = name.value || 'Person';
@@ -24,17 +20,14 @@ start.addEventListener('click', e => {
 sendMessage.addEventListener('click', () => {
     const message = messageBox.value || 'Hello';
     let data = {
-        name: personName,
-        nick: personNick,
+        personName,
+        personNick,
         message
-    }
+    };
     socket.emit('message', data);
-    messageBox.value = '';
-    subscribe();
 })
 
 const addMessage = message => {
-    let time = new Date();
     let msg = document.createElement('div');
     msg.classList.add('col-sm-4', 'msg');
     msg.innerHTML = `<div class="message-info mb-3">
@@ -60,15 +53,16 @@ const addParticipant = msg => {
     names.insertAdjacentHTML('afterbegin', user);
 }
 
-const getMessages = () => {
-    socket.on('history', res => {
-        messageContainer.innerHTML = '';
-        names.innerHTML = '';
-        for (let msg of res.data.slice(-100)) {
-            addMessage(msg);
-            addParticipant(msg);
-        }
-    })
-}
+socket.on('message', msg => {
+    addMessage(msg);
+})
 
-getMessages();
+socket.on('history', res => {
+    console.log(res);
+    messageContainer.innerHTML = '';
+    names.innerHTML = '';
+    for (let msg of res.slice(-100)) {
+        addMessage(msg);
+        addParticipant(msg);
+    }
+})
