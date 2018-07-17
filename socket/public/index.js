@@ -6,6 +6,7 @@ const start = document.querySelector('#start');
 const name = document.querySelector('#name');
 const nick = document.querySelector('#nick');
 const names = document.querySelector('.names');
+const typing = document.querySelector('.typing');
 
 const socket = io.connect();
 
@@ -15,6 +16,7 @@ start.addEventListener('click', e => {
     personName = name.value || 'Person';
     personNick = nick.value || 'CoolGuy';
     dialog.style.display = 'none';
+    socket.emit('user', ({personName, personNick}));
 })
 
 sendMessage.addEventListener('click', () => {
@@ -25,6 +27,11 @@ sendMessage.addEventListener('click', () => {
         message
     };
     socket.emit('message', data);
+    messageBox.value = '';
+})
+
+messageBox.addEventListener('keypress', () => {
+    socket.emit('typing', personNick);
 })
 
 const addMessage = message => {
@@ -53,16 +60,33 @@ const addParticipant = msg => {
     names.insertAdjacentHTML('afterbegin', user);
 }
 
+socket.on('typing', user => {
+    typing.innerHTML = `${user} is typing...`;
+    console.log(`${user} is typing`);
+})
+
+socket.on('stopped typing', () => {
+    typing.innerHTML = '';
+    console.log('stopped typing');
+})
+
+socket.on('user', user => addParticipant(user));
+
+socket.on('users', users => {
+    users.forEach(i => addParticipant(i));
+});
+
 socket.on('message', msg => {
     addMessage(msg);
 })
 
 socket.on('history', res => {
-    console.log(res);
     messageContainer.innerHTML = '';
-    names.innerHTML = '';
     for (let msg of res.slice(-100)) {
         addMessage(msg);
-        addParticipant(msg);
     }
+})
+
+socket.on('disconnect', user => {
+    typing.innerHTML = `<span>${user} left the chat</span>`;
 })

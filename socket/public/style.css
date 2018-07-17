@@ -31,3 +31,13 @@ body {
 .highlighted {
     background-color: #D1CAE0;
 }
+
+.box {
+    position: relative;
+}
+
+.typing {
+    position: absolute;
+    left: 0;
+    top: 40px;
+}
