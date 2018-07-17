@@ -6,7 +6,7 @@ app.use(bodyParser.json());
 
 let messages = [];
 
-app.use(express.static('client'));
+app.use(express.static('./'));
 
 app.get('/messages', (req, res) => {
     res.json(messages);

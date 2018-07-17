@@ -9,6 +9,8 @@ const names = document.querySelector('.names');
 
 let personName, personNick;
 
+const socket = io.connect();
+
 const subscribe = () => {
     setInterval(() => getMessages(), 1000);
 }
@@ -21,12 +23,12 @@ start.addEventListener('click', e => {
 
 sendMessage.addEventListener('click', () => {
     const message = messageBox.value || 'Hello';
-    axios.post('/messages', {
-        personName,
-        personNick,
+    let data = {
+        name: personName,
+        nick: personNick,
         message
-    })
-    .catch(err => console.log(err));
+    }
+    socket.emit('message', data);
     messageBox.value = '';
     subscribe();
 })
@@ -53,22 +55,20 @@ const addMessage = message => {
 const addParticipant = msg => {
     let user = `<li>
     <span>${msg.personName}</span>
-    <span>(${msg.personNick})</span>
+    <span>(@${msg.personNick})</span>
     </li>`;
     names.insertAdjacentHTML('afterbegin', user);
 }
 
 const getMessages = () => {
-    axios.get('/messages')
-    .then(res => {
+    socket.on('history', res => {
         messageContainer.innerHTML = '';
         names.innerHTML = '';
         for (let msg of res.data.slice(-100)) {
             addMessage(msg);
             addParticipant(msg);
         }
-        console.log(res);
-    });
+    })
 }
 
 getMessages();
