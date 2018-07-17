@@ -51,10 +51,10 @@ const addMessage = message => {
 }
 
 const addParticipant = msg => {
-    let user = `<div>
+    let user = `<li>
     <span>${msg.personName}</span>
     <span>(${msg.personNick})</span>
-    </div>`;
+    </li>`;
     names.insertAdjacentHTML('afterbegin', user);
 }
 
